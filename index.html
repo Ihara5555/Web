@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FOREX-MD - Professional Session Manager</title>
+  <meta name="description" content="FOREX-MD - The Ultimate Session Manager with QR code generator, device pairing, GitHub open source, and VPS setup guide.">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Inter', sans-serif;
+      background: #121212; 
+      color: #f0f0f0; 
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+    a { color: #e03e3e; text-decoration: none; transition: 0.3s; }
+    a:hover { color: #ff6b81; }
+
+    canvas#bgCanvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index: -1; }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background-color: rgba(26,26,26,0.95);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    nav .logo { font-weight: 700; font-size: 1.5rem; color: #ff3e3e; }
+    nav ul { list-style: none; display: flex; gap: 2rem; }
+    nav ul li a { font-weight: 600; font-size: 1rem; padding: 0.25rem 0; border-bottom: 2px solid transparent; }
+    nav ul li a:hover { border-bottom-color: #ff3e3e; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .hamburger div { width: 24px; height: 3px; background-color: #ff3e3e; border-radius: 2px; transition: all 0.3s ease; }
+    .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.active div:nth-child(2) { opacity: 0; }
+    .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    .mobile-menu { position: fixed; top: 0; right: -100%; width: 70%; max-width: 320px; height: 100vh; background-color: #1a1a1a; flex-direction: column; padding: 4rem 2rem; gap: 2rem; transition: right 0.35s ease; z-index: 200; display: flex; }
+    .mobile-menu.open { right: 0; }
+    .mobile-menu a { font-weight: 600; font-size: 1.1rem; color: #ff3e3e; }
+
+    header.hero { padding: 6rem 1rem 3rem 1rem; text-align: center; position: relative; z-index: 1; }
+    header.hero h1 { font-size: 3.6rem; color: #fff; text-shadow: 0 0 12px #ff3e3e; }
+    header.hero p { font-size: 1.25rem; color: #bbb; margin-bottom: 2rem; }
+    .btn-primary { background: linear-gradient(135deg,#ff3e3e,#9b59b6); border:none; padding:0.75rem 2rem; font-weight:600; font-size:1.1rem; color:#fff; border-radius:12px; cursor:pointer; box-shadow: 0 4px 15px rgba(255,62,62,0.6); transition:0.3s; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(255,62,62,0.8); transform: translateY(-2px); }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; position: relative; z-index: 1; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:2.5rem; margin-top: 2rem; }
+    .feature { background:#222; padding:2rem; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.8); transition:0.3s; display:flex; flex-direction:column; }
+    .feature:hover { transform: translateY(-6px); box-shadow:0 6px 18px rgba(255,62,62,0.5); }
+    .feature i { font-size:2.5rem; color:#ff3e3e; margin-bottom:1rem; }
+    .feature h3 { color:#fff; margin-bottom:0.75rem; }
+    .feature p { color:#ccc; flex-grow:1; }
+    .btn-link { display:inline-block; margin-top:1rem; padding:0.5rem 1.5rem; background:#2a2a2a; color:#ff3e3e; border-radius:8px; text-decoration:none; transition:0.3s; }
+    .btn-link:hover { background:#3b3b3b; color:#ff6b6b; box-shadow:0 4px 12px rgba(255,62,62,0.5); }
+
+    section.download { background:#222; padding:3.5rem 2rem; border-radius:12px; max-width:700px; margin:3rem auto; text-align:center; box-shadow:0 4px 20px rgba(255,62,62,0.3); }
+    .btn-download { background:linear-gradient(135deg,#ff3e3e,#9b59b6); padding:1rem 2.5rem; font-weight:600; font-size:1.15rem; color:#fff; border-radius:12px; border:none; cursor:pointer; transition:0.3s; display:inline-flex; align-items:center; justify-content:center; gap:0.75rem; }
+    .btn-download:hover { transform: translateY(-2px); box-shadow:0 6px 18px rgba(255,62,62,0.6); }
+
+    section.setup-guide { text-align:center; margin:3rem 0 4rem 0; color:#ddd; }
+    section.setup-guide .step { text-align:left; max-width:650px; margin:1.5rem auto; }
+    section.setup-guide .step h3 { color:#ff3e3e; }
+    section.setup-guide .step p { color:#ccc; }
+
+    .code-wrapper { position: relative; margin-bottom: 1.5rem; border-radius: 8px; background:#1a1a1a; box-shadow: 0 0 12px #ff3e3e; padding-top:2.5rem; }
+    .code-wrapper pre { margin:0; padding:1rem 1.5rem; font-family:'Source Code Pro', monospace; font-size:0.95rem; color:#ff3e3e; overflow-x:auto; border-radius:0 0 8px 8px; }
+    .copy-btn { position:absolute; top:8px; right:8px; background:#ff3e3e; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-size:0.8rem; cursor:pointer; transition:0.3s; }
+    .copy-btn:hover { background:#ff6b6b; }
+
+    footer { text-align:center; color:#7a7a7a; font-size:0.9rem; padding:3rem 1rem 1rem; }
+    footer a { margin:0 0.5rem; color:#ff3e3e; }
+    footer a:hover { color:#ff6b6b; }
+
+    @media(max-width:768px){ nav ul{display:none;} .hamburger{display:flex;} .mobile-menu{width:75%;} header.hero h1{font-size:2.6rem;} section.download{margin:2rem 1rem;} }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<nav role="navigation" aria-label="Primary Navigation">
+  <div class="logo">FOREX-MD</div>
+  <ul>
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="#setup">Setup Guide</a></li>
+    <li><a href="#deploy">Workflow Code</a></li>
+    <li><a href="#footer">Contact</a></li>
+  </ul>
+  <button class="hamburger" aria-label="Toggle menu">
+    <div></div><div></div><div></div>
+  </button>
+</nav>
+
+<div id="mobile-menu" class="mobile-menu">
+  <a href="#hero">Home</a>
+  <a href="#features">Features</a>
+  <a href="#download">Download</a>
+  <a href="#setup">Setup Guide</a>
+  <a href="#deploy">Workflow Code</a>
+  <a href="#footer">Contact</a>
+</div>
+
+<header id="hero" class="hero container">
+  <h1>FOREX-MD</h1>
+  <p>The Ultimate Session Manager</p>
+  <a href="https://whatsapp.com/channel/0029VaeyMWv3QxRu4hA6c33Z" target="_blank">
+    <button class="btn-primary">Join Now <i class="fas fa-arrow-right"></i></button>
+  </a>
+</header>
+
+<main class="container">
+  <section id="features">
+    <h2>Features</h2>
+    <div class="features-grid">
+      <article class="feature">
+        <i class="fas fa-qrcode"></i>
+        <h3>QR Code Generator</h3>
+        <p>Create and manage QR codes seamlessly for your sessions and devices.</p>
+        <a href="/qr" class="btn-link">Go to QR Code Generator</a>
+      </article>
+      <article class="feature">
+        <i class="fas fa-handshake"></i>
+        <h3>Easy Pairing</h3>
+        <p>Connect devices effortlessly with secure and instant pairing codes.</p>
+        <a href="/pair" class="btn-link">Go to Pairing</a>
+      </article>
+      <article class="feature">
+        <i class="fab fa-github"></i>
+        <h3>Open Source</h3>
+        <p>Fully open source and community-driven for transparency and innovation.</p>
+        <a href="https://github.com/nbbb15092/abc.git" class="btn-link">Go to GitHub Repository</a>
+      </article>
+      <article class="feature">
+        <i class="fas fa-download"></i>
+        <h3>Download Ready</h3>
+        <p>Get the latest versions quickly via trusted cloud download links.</p>
+        <a href="/download" class="btn-link">Go to Download</a>
+      </article>
+    </div>
+  </section>
+
+  <section id="deploy" class="download" aria-label="Deploy Code">
+    <h2>DEPLOY CODE</h2>
+    <p>Github Workflow Deploy Code.</p>
+    <div class="code-wrapper">
+      <pre><code id="deploy-cmd">name: Node.js CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start application
+      run: npm start</code></pre>
+      <button class="copy-btn" data-target="deploy-cmd" aria-label="Copy command">Copy</button>
+    </div>
+  </section>
+    
+  <section id="setup" class="setup-guide" aria-label="Setup Guide Section">
+    <h2>Setup Guide: How to Run FOREX-MD on Ubuntu VPS</h2>
+
+    <div class="step">
+      <h3>1. Update Ubuntu and Install Prerequisites</h3>
+      <p>Make sure your server is up to date and install curl, gnupg, and build tools:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd1">sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl gnupg build-essential</code></pre>
+        <button class="copy-btn" data-target="cmd1" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>2. Install Node.js (LTS) and npm</h3>
+      <p>Fetch and install the NodeSource Node.js 18.x LTS repository and install node and npm:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd2">curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs</code></pre>
+        <button class="copy-btn" data-target="cmd2" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>3. Verify Installation</h3>
+      <p>Check installed versions of node and npm to ensure they're installed:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd3">node -v
+npm -v</code></pre>
+        <button class="copy-btn" data-target="cmd3" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>4. Clone the FOREX-MD Repository</h3>
+      <p>Download the latest source code from GitHub:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd4">git clone https://github.com/nbbb15092/abc.git
+cd abc</code></pre>
+        <button class="copy-btn" data-target="cmd4" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>5. Install Dependencies</h3>
+      <p>Install required Node.js modules:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd5">npm install</code></pre>
+        <button class="copy-btn" data-target="cmd5" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>6. Start FOREX-MD</h3>
+      <p>Launch the application:</p>
+      <div class="code-wrapper">
+        <pre><code id="cmd6">npm start</code></pre>
+        <button class="copy-btn" data-target="cmd6" aria-label="Copy command">Copy</button>
+      </div>
+    </div>
+
+    <p>For more information, visit the <a href="https://github.com/nbbb15092/abc.git" target="_blank" rel="noopener">official GitHub repository</a>.</p>
+  </section>
+</main>
+
+<footer id="footer">
+  <p>© <span id="year"></span> FOREX-MD | Powered by Asitha Chathuranga</p>
+  <p>
+    <a href="https://github.com/nbbb15092/abc" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://wa.me/+94743381623" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <a href="https://youtu.be/g22ttYjUbyY" target="_blank"><i class="fab fa-youtube"></i></a>
+  </p>
+</footer>
+
+<script>
+  // Dynamic year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Hamburger
+  const hamburger = document.querySelector('.hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    mobileMenu.classList.toggle('open');
+  });
+
+  // Background Dots
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+  const dots = [];
+  for(let i=0;i<100;i++){
+    dots.push({
+      x: Math.random()*width,
+      y: Math.random()*height,
+      r: Math.random()*3+1,
+      speed: Math.random()*1+0.5,
+      color: Math.random()>0.5?'#ff6b81':'#9b59b6'
+    });
+  }
+  function animateDots(){
+    ctx.clearRect(
